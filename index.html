@@ -1,63 +1,255 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nanafeed — Coming soon</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { height: 100%; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      background: #FFCC00;
-      color: #111;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-      text-align: center;
-      -webkit-font-smoothing: antialiased;
-    }
-    .banana { font-size: 96px; line-height: 1; margin-bottom: 24px; }
-    h1 {
-      font-size: 56px;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-      margin-bottom: 12px;
-    }
-    .subtitle {
-      font-size: 20px;
-      font-weight: 500;
-      opacity: 0.7;
-      margin-bottom: 48px;
-    }
-    .privacy-link {
-      position: fixed;
-      bottom: 24px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 14px;
-      color: #111;
-      text-decoration: none;
-      border-bottom: 1px solid #111;
-      padding-bottom: 2px;
-      opacity: 0.6;
-      transition: opacity 0.15s ease;
-    }
-    .privacy-link:hover { opacity: 1; }
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>NanaFeed</title>
+<meta name="description" content="NanaFeed — the social app about bananas. Rate the banana you actually ate, check ripeness with your camera, and see what the shelf near you really tastes like.">
+<link rel="icon" type="image/png" href="img/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800;900&display=swap">
+<style>
+  /* Tokens lifted from the app: constants/brand.ts + build 47 screens. Light only, like the app's default. */
+  :root{
+    --navy:#0F1A4D; --ink:#0F1A4D; --ink-2:#5B6488; --mute:#8E95B3;
+    --yellow:#F5C800; --yellow-pale:#FFF3B0; --orange:#F5842C; --magenta:#D02080; --green:#2FA84F;
+    --bg:#F9F9F9; --panel:#F2F2F3; --paper:#FFFFFF; --line:#E8E8EA;
+    --r:24px; --r-s:16px;
+    --font:"Nunito",-apple-system,BlinkMacSystemFont,"SF Pro Rounded","Segoe UI",Roboto,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:17px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  a{color:inherit}
+  .wrap{max-width:1040px;margin:0 auto;padding-inline:20px}
+  h1,h2,h3{margin:0;text-wrap:balance;letter-spacing:-.01em;font-weight:800;color:var(--navy)}
+  p{margin:0}
+  .eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);font-weight:800}
 
-    @media (max-width: 480px) {
-      .banana { font-size: 72px; margin-bottom: 20px; }
-      h1 { font-size: 40px; }
-      .subtitle { font-size: 16px; margin-bottom: 32px; }
-    }
-  </style>
+  /* nav */
+  .nav{display:flex;align-items:center;justify-content:space-between;padding-block:18px;gap:16px;border-bottom:2px solid var(--yellow)}
+  .mark{display:flex;align-items:center;gap:10px;text-decoration:none;font-weight:900;font-size:22px;color:var(--navy);letter-spacing:-.02em}
+  .mark img{height:30px;width:auto;display:block}
+  .lang{display:flex;gap:6px}
+  .lang button{appearance:none;border:1.5px solid var(--navy);background:var(--paper);color:var(--navy);border-radius:999px;padding:6px 14px;cursor:pointer;font:inherit;font-weight:800;font-size:13px}
+  .lang button[aria-pressed="true"]{background:var(--yellow-pale);border-color:var(--yellow-pale)}
+  .lang button:focus-visible{outline:2px solid var(--navy);outline-offset:2px}
+
+  /* hero */
+  .hero{display:grid;grid-template-columns:1.05fr .95fr;gap:36px;align-items:center;padding-block:44px 56px}
+  .hero h1{font-size:clamp(36px,5.4vw,64px);line-height:1.02;font-weight:900}
+  .hero h1 em{font-style:normal;background:linear-gradient(transparent 60%,var(--yellow) 60%);padding:0 .05em}
+  .lede{font-size:clamp(17px,1.5vw,20px);color:var(--ink-2);max-width:32em;margin-top:20px;font-weight:600}
+  .cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px;align-items:center}
+  .store{display:inline-flex;align-items:center;gap:10px;background:var(--navy);color:var(--yellow);text-decoration:none;border-radius:999px;padding:13px 22px;font-weight:800;line-height:1.1;min-height:54px}
+  .store small{display:block;font-size:11px;font-weight:700;color:#C9CDE0;letter-spacing:.03em}
+  .store.soon{background:var(--paper);color:var(--ink-2);border:1.5px solid var(--line);cursor:default}
+  .store.soon small{color:var(--mute)}
+  .store svg{width:22px;height:22px;flex:none}
+  .fine{font-size:14px;color:var(--mute);margin-top:14px;font-weight:600}
+
+  /* phone frame with real screenshot */
+  .phone{justify-self:center;width:min(300px,84vw);max-width:100%;border-radius:46px;background:#111;padding:10px;box-shadow:0 30px 60px rgba(15,26,77,.18);position:relative}
+  .phone img{display:block;width:100%;height:auto;border-radius:38px}
+  .phone.sm{width:min(250px,76vw);border-radius:40px;padding:8px}
+  .phone.sm img{border-radius:33px}
+
+  /* sections */
+  section{padding-block:56px;border-top:1px solid var(--line)}
+  .sec-head{display:grid;grid-template-columns:1fr 1.3fr;gap:20px;align-items:end;margin-bottom:30px}
+  .sec-head h2{font-size:clamp(26px,3.2vw,38px)}
+  .sec-head p{color:var(--ink-2);font-weight:600;max-width:40em}
+
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;counter-reset:step}
+  .step{background:var(--panel);border-radius:var(--r);padding:24px 22px;display:flex;flex-direction:column;gap:8px;min-height:190px}
+  .step::before{counter-increment:step;content:counter(step);width:40px;height:40px;border-radius:50%;background:var(--yellow);border:1.5px solid var(--navy);display:grid;place-items:center;font-weight:900;color:var(--navy);margin-bottom:6px}
+  .step h3{font-size:19px}
+  .step p{color:var(--ink-2);font-size:15.5px;font-weight:600}
+
+  .feat{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .f{background:var(--panel);border-radius:var(--r);padding:26px 24px 0;display:grid;grid-template-rows:auto 1fr;gap:16px;overflow:hidden}
+  .f .txt{display:flex;flex-direction:column;gap:8px}
+  .f h3{font-size:22px}
+  .f p{color:var(--ink-2);font-size:15.5px;font-weight:600}
+  .badge{align-self:flex-start;display:inline-block;background:var(--magenta);color:#fff;font-weight:800;font-size:12px;letter-spacing:.04em;padding:4px 12px;transform:skewX(-8deg);border-radius:4px}
+  .badge span{display:inline-block;transform:skewX(8deg)}
+  .shotbox{display:flex;justify-content:center;align-items:flex-end;padding-top:6px}
+  .shotbox .phone{margin-bottom:-38%;box-shadow:0 14px 34px rgba(15,26,77,.16)}
+  .f.wide{grid-column:1/-1;grid-template-columns:1fr 1fr;grid-template-rows:none;padding:26px 24px}
+  .f.wide .shotbox{padding:0;align-items:center}
+  .f.wide .shotbox .phone{margin-bottom:0}
+  .meta{font-size:14px;color:var(--ink-2);font-weight:700;display:flex;flex-wrap:wrap;gap:6px 12px;margin-top:4px}
+  .meta b{color:var(--navy)}
+  .meta .price{color:var(--orange)}
+  .meta .ok{color:var(--green)}
+
+  /* data */
+  .data{display:grid;grid-template-columns:1.1fr .9fr;gap:30px;align-items:start}
+  .data h2{font-size:clamp(26px,3.2vw,36px);margin-top:10px;margin-bottom:14px}
+  .data p{color:var(--ink-2);font-weight:600}
+  .nums{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  .n{background:var(--panel);border-radius:var(--r-s);padding:18px 18px 16px}
+  .n b{display:block;font-weight:900;font-size:32px;color:var(--navy);font-variant-numeric:tabular-nums;letter-spacing:-.02em;line-height:1.1}
+  .n span{font-size:13px;color:var(--mute);font-weight:700}
+  .mail{display:inline-flex;align-items:center;gap:8px;margin-top:18px;font-weight:800;color:var(--navy);text-decoration:none;background:var(--yellow);border:1.5px solid var(--navy);border-radius:999px;padding:11px 18px}
+
+  /* tab bar echo (footer decoration) */
+  .tabbar{display:flex;justify-content:center;margin:48px auto 0;padding:10px 22px;border-radius:999px;background:rgba(255,255,255,.7);border:1px solid var(--line);gap:26px;width:max-content;max-width:100%;box-shadow:0 10px 30px rgba(15,26,77,.08)}
+  .tabbar i{width:44px;height:44px;border-radius:50%;background:var(--yellow);border:1.5px solid var(--navy);display:grid;place-items:center;font-style:normal;font-weight:900;color:var(--navy);font-size:18px}
+  .tabbar i.on{background:var(--navy);color:var(--yellow)}
+  .tabbar i.big{width:56px;height:56px;margin-top:-6px;font-size:26px}
+
+  footer{padding-block:28px 56px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px;font-size:14px;color:var(--mute);font-weight:600}
+  footer nav{display:flex;gap:18px;flex-wrap:wrap}
+  footer a{color:var(--ink-2);text-decoration:none;border-bottom:1.5px solid var(--yellow)}
+
+  @media (max-width:820px){
+    .hero{grid-template-columns:1fr;gap:30px;padding-block:28px 44px}
+    .phone{order:-1;width:min(240px,74vw)}
+    .sec-head{grid-template-columns:1fr;gap:8px}
+    .steps{grid-template-columns:1fr}
+    .feat{grid-template-columns:1fr}
+    .f.wide{grid-template-columns:1fr}
+    .data{grid-template-columns:1fr}
+    section{padding-block:44px}
+    .tabbar{gap:16px}
+  }
+</style>
+
 </head>
 <body>
-  <div class="banana" aria-hidden="true">🍌</div>
-  <h1>Nanafeed</h1>
-  <p class="subtitle">Coming soon</p>
-  <a class="privacy-link" href="/privacy">Privacy Policy</a>
+<div class="wrap">
+  <header class="nav">
+    <a class="mark" href="/" aria-label="NanaFeed"><img src="img/logo-n.png" alt="">anafeed</a>
+    <div class="lang" role="group" aria-label="Language">
+      <button type="button" id="lang-en" data-lang="en" aria-pressed="true">EN</button>
+      <button type="button" id="lang-uk" data-lang="uk" aria-pressed="false">UA</button>
+    </div>
+  </header>
+
+  <section class="hero" style="border-top:0">
+    <div>
+      <p class="eyebrow" data-en="The social app about bananas" data-uk="Соцмережа про банани">The social app about bananas</p>
+      <h1 style="margin-top:12px" data-en="Rate the banana you <em>actually</em> ate." data-uk="Оціни банан, який ти <em>справді</em> з’їв.">Rate the banana you <em>actually</em> ate.</h1>
+      <p class="lede" data-en="One photo, one taste score, one honest word about the shop. NanaFeed checks that it’s a real banana, reads how ripe it is, and puts your review on the map next to everyone else’s. No influencers, no ads, no fake fruit."
+         data-uk="Одне фото, одна оцінка смаку, одне чесне слово про магазин. NanaFeed перевіряє, що це справжній банан, читає його стиглість і ставить твій відгук на мапу поруч з усіма. Без інфлюенсерів, реклами і несправжніх фруктів.">One photo, one taste score, one honest word about the shop. NanaFeed checks that it’s a real banana, reads how ripe it is, and puts your review on the map next to everyone else’s. No influencers, no ads, no fake fruit.</p>
+      <div class="cta">
+        <a class="store" id="btn-ios" href="https://testflight.apple.com/join/JM6gYrh1" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.4 12.6c0-2.5 2-3.6 2.1-3.7-1.2-1.7-3-1.9-3.6-2-1.5-.2-3 .9-3.7.9-.8 0-2-.9-3.2-.9-1.7 0-3.2 1-4.1 2.5-1.8 3-.5 7.6 1.3 10.1.8 1.2 1.8 2.6 3.1 2.5 1.3 0 1.7-.8 3.3-.8 1.5 0 2 .8 3.3.8 1.4 0 2.2-1.2 3.1-2.5.9-1.4 1.3-2.7 1.4-2.8-.1 0-3-1.1-3-4.1zM14 5.3c.7-.8 1.2-2 1-3.2-1 0-2.2.7-2.9 1.5-.6.7-1.2 1.9-1 3 1.1.1 2.2-.6 2.9-1.3z"/></svg>
+          <span><small data-en="Join the beta on" data-uk="Бета в">Join the beta on</small>TestFlight</span>
+        </a>
+        <a class="store" id="btn-android" href="https://expo.dev/artifacts/eas/jqxGjH1tzjF9lt0JOmWdxChZ5lhJR04QrVzqGoYmoLk.apk" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 3.5v17c0 .4.4.7.8.5l9.4-8.5L4.8 3c-.4-.2-.8.1-.8.5zm12.6 7.6L6.9 2.7l7.6 7.4 2.1 1zm0 1.8-2.1 1-7.6 7.4 9.7-8.4zm3.9-2.3-2.7-1.5-2.6 2.9 2.6 2.9 2.7-1.5c.8-.5.8-2.3 0-2.8z"/></svg>
+          <span><small data-en="Android beta" data-uk="Бета для Android">Android beta</small>APK</span>
+        </a>
+      </div>
+      <p class="fine" data-en="Free. Public beta on iPhone and Android; App Store and Google Play soon. Made in Frankfurt by people who trade bananas for a living."
+         data-uk="Безкоштовно. Відкрита бета на iPhone і Android; App Store і Google Play — скоро. Зроблено у Франкфурті людьми, які торгують бананами по роботі.">Free. Public beta on iPhone and Android; App Store and Google Play soon. Made in Frankfurt by people who trade bananas for a living.</p>
+    </div>
+    <div class="phone"><img src="img/post.jpg" alt="NanaFeed post: Bananiv bananas rated in Fora, Haisyn — brand, ripeness meter, price, taste stars" width="640" height="1308"></div>
+  </section>
+
+  <section id="how">
+    <div class="sec-head">
+      <h2 data-en="How it works" data-uk="Як це працює">How it works</h2>
+      <p data-en="Thirty seconds in the kitchen. The rest happens on its own." data-uk="Тридцять секунд на кухні. Решта відбувається сама.">Thirty seconds in the kitchen. The rest happens on its own.</p>
+    </div>
+    <div class="steps">
+      <div class="step"><h3 data-en="Shoot the banana" data-uk="Сфоткай банан">Shoot the banana</h3><p data-en="The app checks it is a real banana before anything is posted, so the feed stays fruit, not noise." data-uk="Застосунок перевіряє, що це справжній банан, ще до публікації — тому стрічка лишається фруктом, а не шумом.">The app checks it is a real banana before anything is posted, so the feed stays fruit, not noise.</p></div>
+      <div class="step"><h3 data-en="Rate it" data-uk="Оціни">Rate it</h3><p data-en="Taste 1–5, sweetness, ripeness 1–5, price per kilo, the shop, and whether you’d buy it again. Peel the sticker into your collection." data-uk="Смак 1–5, солодкість, стиглість 1–5, ціна за кіло, магазин і чи купив би знову. Наліпку — в колекцію.">Taste 1–5, sweetness, ripeness 1–5, price per kilo, the shop, and whether you’d buy it again. Peel the sticker into your collection.</p></div>
+      <div class="step"><h3 data-en="See the map" data-uk="Дивись мапу">See the map</h3><p data-en="Every rating lands on a store. Open the map and see which chain near you sells sweet fruit and which sells green rocks." data-uk="Кожна оцінка лягає на магазин. Відкрий мапу і побач, яка мережа поруч продає солодке, а яка — зелене каміння.">Every rating lands on a store. Open the map and see which chain near you sells sweet fruit and which sells green rocks.</p></div>
+    </div>
+  </section>
+
+  <section id="features">
+    <div class="sec-head">
+      <h2 data-en="What’s inside" data-uk="Що всередині">What’s inside</h2>
+      <p data-en="Real screens from the current build, not mockups." data-uk="Справжні екрани з поточної версії, не макети.">Real screens from the current build, not mockups.</p>
+    </div>
+    <div class="feat">
+      <div class="f wide">
+        <div class="txt">
+          <span class="badge"><span data-en="Camera" data-uk="Камера">Camera</span></span>
+          <h3 data-en="Ripeness meter" data-uk="Стигломір">Ripeness meter</h3>
+          <p data-en="Point the camera at a banana and get its ripeness on a 1–5 scale with a plain tip: eat today, wait two days, bake bread. Calibrated to the scale real traders use, not to stock photos." data-uk="Наведи камеру на банан і отримай стиглість за шкалою 1–5 з простою порадою: їж сьогодні, почекай два дні, печи хліб. Відкалібровано за шкалою справжніх трейдерів, а не за стоковими фото.">Point the camera at a banana and get its ripeness on a 1–5 scale with a plain tip: eat today, wait two days, bake bread. Calibrated to the scale real traders use, not to stock photos.</p>
+          <div class="meta"><span data-en="3 of 5" data-uk="3 з 5"><b>3 of 5</b></span><span data-en="Ripe — eat today or tomorrow" data-uk="Стиглий — їж сьогодні або завтра">Ripe — eat today or tomorrow</span></div>
+        </div>
+        <div class="shotbox"><div class="phone sm"><img src="img/ripeness.jpg" alt="Ripeness meter result: 3 of 5, ripe, eat today or tomorrow" width="640" height="1308" loading="lazy"></div></div>
+      </div>
+      <div class="f">
+        <div class="txt">
+          <span class="badge"><span data-en="Social" data-uk="Соціальне">Social</span></span>
+          <h3 data-en="“I tasted it too”" data-uk="«Теж куштував»">“I tasted it too”</h3>
+          <p data-en="Bought the same banana? Confirm someone’s post with your own taste and ripeness. Three people agree and the rating stops being one person’s opinion." data-uk="Купив той самий банан? Підтверди чужий пост своєю оцінкою смаку і стиглості. Троє погодились — і оцінка перестає бути думкою однієї людини.">Bought the same banana? Confirm someone’s post with your own taste and ripeness. Three people agree and the rating stops being one person’s opinion.</p>
+          <div class="meta"><b>Bananiv <span class="ok">✓</span></b><span>5★</span><span data-en="ripeness 5/5" data-uk="стиглість 5/5">ripeness 5/5</span><span data-en="1 tasted too" data-uk="1 теж куштував">1 tasted too</span></div>
+        </div>
+        <div class="shotbox"><div class="phone sm"><img src="img/cosign.jpg" alt="Feed post with the “tasted it too” confirmation" width="640" height="1308" loading="lazy"></div></div>
+      </div>
+      <div class="f">
+        <div class="txt">
+          <span class="badge"><span data-en="Map" data-uk="Мапа">Map</span></span>
+          <h3 data-en="Every shop, seven countries" data-uk="Кожен магазин, сім країн">Every shop, seven countries</h3>
+          <p data-en="61 307 retail locations already on the map across Ukraine, Germany, Poland, France, Spain, Italy and Portugal. Filter by chain and radius; the shelf ripeness index shows where enough people rated." data-uk="61 307 магазинів уже на мапі: Україна, Німеччина, Польща, Франція, Іспанія, Італія, Португалія. Фільтр за мережею і радіусом; індекс стиглості полиці — там, де оцінило достатньо людей.">61 307 retail locations already on the map across Ukraine, Germany, Poland, France, Spain, Italy and Portugal. Filter by chain and radius; the shelf ripeness index shows where enough people rated.</p>
+        </div>
+        <div class="shotbox"><div class="phone sm"><img src="img/map.jpg" alt="Map of Europe with banana markers where users rated" width="640" height="1308" loading="lazy"></div></div>
+      </div>
+      <div class="f wide">
+        <div class="txt">
+          <span class="badge"><span data-en="Collection" data-uk="Колекція">Collection</span></span>
+          <h3 data-en="Your banana profile" data-uk="Твій банановий профіль">Your banana profile</h3>
+          <p data-en="Favourite brand, most frequent origin, countries you’ve tasted, your own banana map and a sticker album cropped straight from your photos: Chiquita, Dole, Del Monte, Rewe Bio, a no-name from a market in Lisbon." data-uk="Улюблений бренд, найчастіша країна, скільки країн куштував, власна бананова карта і альбом наліпок, вирізаних просто з твоїх фото: Chiquita, Dole, Del Monte, Rewe Bio, ноунейм з ринку в Лісабоні.">Favourite brand, most frequent origin, countries you’ve tasted, your own banana map and a sticker album cropped straight from your photos: Chiquita, Dole, Del Monte, Rewe Bio, a no-name from a market in Lisbon.</p>
+          <div class="meta"><span data-en="Favourite brand" data-uk="Улюблений бренд">Favourite brand</span><b>Dole Gourmet Orito</b><span data-en="Countries" data-uk="Країни">Countries</span><b>6</b></div>
+        </div>
+        <div class="shotbox"><div class="phone sm"><img src="img/profile.jpg" alt="Profile: favourite brand, countries, personal banana map and sticker album" width="640" height="1308" loading="lazy"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="data">
+    <div class="data">
+      <div>
+        <p class="eyebrow" data-en="For retailers and brands" data-uk="Для мереж і брендів">For retailers and brands</p>
+        <h2 data-en="The shelf, seen by the people who buy from it" data-uk="Полиця очима тих, хто з неї купує">The shelf, seen by the people who buy from it</h2>
+        <p data-en="Every post is a photo-verified data point: brand, price per kilo, ripeness on the shelf, taste after purchase, store and date. Aggregated by chain and city it becomes something no audit gives you: how your bananas actually taste to customers, and how they compare to the shop across the street. We are collecting now and will share the first reports with partner chains after launch."
+           data-uk="Кожен пост — це верифікована фотографією точка даних: бренд, ціна за кіло, стиглість на полиці, смак після покупки, магазин і дата. Зведене по мережах і містах, це стає тим, чого не дає жоден аудит: як твої банани насправді смакують покупцям і як вони виглядають поруч із магазином через дорогу. Ми збираємо зараз і поділимось першими звітами з мережами-партнерами після запуску.">Every post is a photo-verified data point: brand, price per kilo, ripeness on the shelf, taste after purchase, store and date. Aggregated by chain and city it becomes something no audit gives you: how your bananas actually taste to customers, and how they compare to the shop across the street. We are collecting now and will share the first reports with partner chains after launch.</p>
+        <a class="mail" href="mailto:maksym@bananiv.com"><span data-en="Talk to us" data-uk="Напишіть нам">Talk to us</span> · maksym@bananiv.com</a>
+      </div>
+      <div class="nums">
+        <div class="n"><b>7</b><span data-en="countries of purchase" data-uk="країн покупки">countries of purchase</span></div>
+        <div class="n"><b>61 307</b><span data-en="stores on the map" data-uk="магазинів на мапі">stores on the map</span></div>
+      </div>
+    </div>
+    <div class="tabbar" aria-hidden="true"><i class="on">⌂</i><i>◫</i><i class="big">+</i><i>▥</i><i>◯</i></div>
+  </section>
+
+  <footer>
+    <div>© 2026 Bananiv GmbH · Frankfurt am Main · <span data-en="Bananas are our day job." data-uk="Банани — наша основна робота.">Bananas are our day job.</span></div>
+    <nav>
+      <a href="/privacy" data-en="Privacy" data-uk="Приватність">Privacy</a>
+      <a href="/terms" data-en="Terms" data-uk="Умови">Terms</a>
+      <a href="/impressum">Impressum</a>
+      <a href="https://bananiv.com" rel="noopener">bananiv.com</a>
+    </nav>
+  </footer>
+</div>
+
+<script>
+(function(){
+  var KEY='nf-lang';
+  function apply(lang){
+    document.documentElement.lang = lang==='uk' ? 'uk' : 'en';
+    document.querySelectorAll('[data-en]').forEach(function(el){
+      var v = el.getAttribute('data-'+lang) || el.getAttribute('data-en');
+      if (v !== null) el.innerHTML = v;
+    });
+    document.querySelectorAll('.lang button').forEach(function(b){ b.setAttribute('aria-pressed', String(b.dataset.lang===lang)); });
+    try{ localStorage.setItem(KEY, lang); }catch(e){}
+  }
+  var start='en';
+  try{ start = localStorage.getItem(KEY) || ((navigator.language||'').toLowerCase().indexOf('uk')===0 ? 'uk' : 'en'); }catch(e){}
+  apply(start);
+  document.querySelectorAll('.lang button').forEach(function(b){ b.addEventListener('click', function(){ apply(b.dataset.lang); }); });
+})();
+</script>
+
 </body>
 </html>
