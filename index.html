@@ -25,6 +25,8 @@
 <meta name="twitter:image" content="https://nanafeed.io/linkedin_cover.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800;900&display=swap">
+<script>document.documentElement.className+=" js"</script>
+<script src="logo.js" defer></script>
 <style>
   /* Tokens lifted from the app: constants/brand.ts + build 47 screens. Light only, like the app's default. */
   :root{
@@ -54,11 +56,11 @@
   /* hero */
   .hero{display:grid;grid-template-columns:1.05fr .95fr;gap:36px;align-items:center;padding-block:44px 56px}
   .hero h1{font-size:clamp(36px,5.4vw,64px);line-height:1.02;font-weight:900}
-  .hero h1 em{font-style:normal;background:linear-gradient(transparent 60%,var(--yellow) 60%);padding:0 .05em;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+  .hero h1 em{font-style:normal;position:relative;padding:0 .05em}
   .lede{font-size:clamp(17px,1.5vw,20px);color:var(--ink-2);max-width:32em;margin-top:20px;font-weight:600}
   /* --badge-h is the VISIBLE button height, shared by both badges (see .googleplay img).
-     16px gap, not 12: the Play badge carries transparent clear space that would otherwise
-     overlap the Apple badge and steal ~1px of its click area. */
+     16px gap, not 12: the Play badge's transparent clear space would otherwise overlap
+     the Apple badge and steal ~1px of its click area. */
   .cta{display:flex;flex-wrap:wrap;gap:16px;margin-top:28px;align-items:center;--badge-h:54px}
   /* official store badges, both used unmodified, min 40px tall */
   .appstore,.googleplay{display:inline-flex;align-items:center;text-decoration:none;border-radius:8px}
@@ -85,28 +87,97 @@
   .sec-head h2{font-size:clamp(26px,3.2vw,38px)}
   .sec-head p{color:var(--ink-2);font-weight:600;max-width:40em}
 
-  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;counter-reset:step}
-  .step{background:var(--panel);border-radius:var(--r);padding:24px 22px;display:flex;flex-direction:column;gap:8px;min-height:190px}
-  .step::before{counter-increment:step;content:counter(step);width:40px;height:40px;border-radius:50%;background:var(--yellow);border:1.5px solid var(--navy);display:grid;place-items:center;font-weight:900;color:var(--navy);margin-bottom:6px}
-  .step h3{font-size:19px}
-  .step p{color:var(--ink-2);font-size:15.5px;font-weight:600}
+  /* the app's own sticker, from components/feed/CountryBadge.tsx: torn-label contour on a
+     150x49 viewBox stretched with preserveAspectRatio="none" (background-size:100% 100%),
+     printed-label magenta #D6196F, Nunito-Black 11.5, padding 12/5 — not the palette magenta */
+  .badge{align-self:flex-start;display:inline-block;padding:5px 12px;color:#fff;font-weight:900;font-size:11.5px;line-height:1.15;text-align:center;
+         background:url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 150 49%22 preserveAspectRatio=%22none%22><path d=%22M 2.75 41.5 C 3.16 41.59 3.84 42.06 3.98 42.1 L 52.73 48.55 C 77.4 48.86 103.13 43.69 127.83 45.35 C 129.36 45.46 138.29 47.39 138.68 47.1 L 150.0 10.69 C 149.8 9.85 146.79 9.55 145.73 9.35 C 130.81 6.51 114.64 3.59 99.57 1.34 C 90.54 0.0 79.73 0.15 70.51 0.54 C 50.14 1.41 29.97 4.14 9.52 4.21 L 0.0 41.05 C 0.02 41.2 2.33 41.4 2.75 41.5 Z%22 fill=%22%23D6196F%22/></svg>") 0 0/100% 100% no-repeat}
+  .badge span{display:inline-block}
 
-  .feat{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-  .f{background:var(--panel);border-radius:var(--r);padding:26px 24px 0;display:grid;grid-template-rows:auto 1fr;gap:16px;overflow:hidden}
-  .f .txt{display:flex;flex-direction:column;gap:8px}
-  .f h3{font-size:22px}
-  .f p{color:var(--ink-2);font-size:15.5px;font-weight:600}
-  .badge{align-self:flex-start;display:inline-block;background:var(--magenta);color:#fff;font-weight:800;font-size:12px;letter-spacing:.04em;padding:4px 12px;transform:skewX(-8deg);border-radius:4px}
-  .badge span{display:inline-block;transform:skewX(8deg)}
-  .shotbox{display:flex;justify-content:center;align-items:flex-end;padding-top:6px}
-  .shotbox .phone{margin-bottom:-38%;box-shadow:0 14px 34px rgba(15,26,77,.16)}
-  .f.wide{grid-column:1/-1;grid-template-columns:1fr 1fr;grid-template-rows:none;padding:26px 24px}
-  .f.wide .shotbox{padding:0;align-items:center}
-  .f.wide .shotbox .phone{margin-bottom:0}
-  .meta{font-size:14px;color:var(--ink-2);font-weight:700;display:flex;flex-wrap:wrap;gap:6px 12px;margin-top:4px}
-  .meta b{color:var(--navy)}
-  .meta .price{color:var(--orange)}
-  .meta .ok{color:var(--green)}
+  /* ===== pinned story. One markup, two layouts: each .sl carries its own phone and text.
+     Mobile makes the list a scroll-snap carousel; above 900px the slides stack in one cell
+     and the section grows to N screens so .story-pin sticks. No JS / reduced motion: a list. */
+  .story{--n:4}
+  .story-pin{display:flex;flex-direction:column}
+  .story-eyebrow{order:1}
+  /* desktop puts the counter above the text; mobile puts it under the carousel */
+  .story-meta{display:flex;align-items:center;justify-content:center;gap:14px;order:3;margin-top:18px}
+  .story-main{order:2}
+  .story-count{font-size:13px;font-weight:800;letter-spacing:.1em;color:var(--mute);font-variant-numeric:tabular-nums}
+  .story-count b{color:var(--navy)}
+  .dots{display:flex;gap:8px}
+  .dot{appearance:none;border:0;padding:0;width:26px;height:10px;border-radius:999px;background:var(--line);cursor:pointer;transition:background .3s ease}
+  .dot.on{background:var(--yellow)}
+  .dot:focus-visible{outline:2px solid var(--navy);outline-offset:3px}
+  .sl-tx{display:flex;flex-direction:column;gap:10px;align-items:flex-start}
+  .sl-tx{position:relative}
+  .sl-tx h3{font-size:clamp(40px,4.6vw,68px);line-height:1.02;letter-spacing:-.02em}
+  .sl-tx p{color:var(--ink-2);font-size:15.5px;font-weight:600}
+  .story-big{font-size:15px;color:var(--ink-2);font-weight:700}
+  .story-big .story-stat{font-size:30px;font-weight:900;color:var(--navy);font-variant-numeric:tabular-nums;display:block;line-height:1.1}
+  .sl-ph{display:flex;justify-content:center}
+  .sl-ph .phone{width:min(230px,56vw)}
+
+  /* words ride up from behind a mask: the inner span moves, the outer clips */
+  .w{display:inline-block;overflow:hidden;vertical-align:bottom}
+  .w>span{display:inline-block;transform:translateY(110%);transition:transform .5s cubic-bezier(.2,.8,.2,1)}
+  .sl.on .w>span{transform:none}
+  .sl.out .w>span{transform:translateY(-110%);transition-duration:.25s}
+
+  /* the ghost step number sits behind its own text column */
+  /* the number sits in a reserved gutter right of the copy: .sl-tx keeps a padding the
+     text can never enter, and the number is pinned to that padding edge. */
+  .sl-no{display:none;position:absolute;right:0;top:50%;transform:translateY(-50%);z-index:-1;
+         font-size:clamp(90px,11vw,150px);font-weight:900;line-height:1;color:var(--navy);opacity:.05;pointer-events:none}
+
+  /* the card deck: one phone, N screens, transforms written per frame by JS */
+  .story-deck{display:none;position:relative}
+  .deck{position:relative;aspect-ratio:640/1308;overflow:hidden;border-radius:33px}
+  .deck img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0}
+  .deck-shadow{position:absolute;left:50%;bottom:-16px;width:68%;height:24px;border-radius:50%;
+               background:rgba(15,26,77,.3);filter:blur(13px);transform:translateX(-50%);opacity:.55}
+
+  /* logo letters: transform only */
+  .mark .word{display:inline-block}   /* .mark is a flex row with gap:10px — without this wrapper that gap lands between every letter */
+  .mark .lt{display:inline-block;position:relative;will-change:transform}
+  .mark .peel{position:absolute;left:50%;bottom:-4px;width:12px;height:12px;opacity:0;pointer-events:none}
+  .mark .peel svg{display:block;width:100%;height:100%}
+  .mark .zzz{position:absolute;left:100%;top:-7px;margin-left:3px;font-size:10px;font-weight:800;
+             letter-spacing:.08em;color:var(--mute);opacity:0;pointer-events:none;white-space:nowrap}
+  .mark .dot{position:absolute;left:50%;top:-2px;width:6px;height:6px;margin-left:-3px;border-radius:50%;
+             background:var(--yellow);opacity:0;pointer-events:none}
+  .mark .rope{position:absolute;left:100%;top:50%;width:14px;height:1.5px;background:var(--mute);
+              transform-origin:0 50%;opacity:0;pointer-events:none}
+
+  /* mobile / no-JS: plain stacked list */
+  .slides{display:grid;gap:26px}
+  .sl{display:grid;gap:16px}
+
+  /* mobile with JS: swipe carousel */
+  @media (max-width:899px){
+    html.js .slides{display:flex;gap:0;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+    html.js .slides::-webkit-scrollbar{display:none}
+    html.js .sl{flex:0 0 100%;scroll-snap-align:center;padding:0 2px}
+  }
+
+  @media (min-width:900px){
+    html.js .story{height:calc(var(--n) * 100vh)}
+    html.js .story-pin{position:sticky;top:0;height:100vh;justify-content:center}
+    .story-meta{order:2;justify-content:flex-start;margin:14px 0 22px}
+    .story-main{order:3}
+    html.js .story-main{display:grid;grid-template-columns:1fr minmax(240px,320px);gap:48px;align-items:center}
+    html.js .slides{display:block;position:relative;height:62vh;overflow:visible}
+    html.js .sl{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;pointer-events:none}
+    html.js .sl.on{pointer-events:auto}
+    html.js .sl-ph{display:none}              /* the shared deck takes over above 900px */
+    html.js .sl-no{display:block}
+    html.js .sl-tx{padding-right:clamp(110px,13vw,180px)}
+    html.js .story-deck{display:block}
+    html.js .story-deck .phone{width:min(300px,30vh);margin:0 auto}
+    /* only the live step and the one leaving are lit; the words do the moving */
+    html.js .sl-tx{opacity:0;transition:opacity .25s ease}
+    html.js .sl.on .sl-tx,html.js .sl.out .sl-tx{opacity:1}
+  }
 
   /* data */
   .data{display:grid;grid-template-columns:1.1fr .9fr;gap:30px;align-items:start}
@@ -118,11 +189,21 @@
   .n span{font-size:13px;color:var(--mute);font-weight:700}
   .mail{display:inline-flex;align-items:center;gap:8px;margin-top:18px;font-weight:800;color:var(--navy);text-decoration:none;background:var(--yellow);border:1.5px solid var(--navy);border-radius:999px;padding:11px 18px}
 
-  /* tab bar echo (footer decoration) */
-  .tabbar{display:flex;justify-content:center;margin:48px auto 0;padding:10px 22px;border-radius:999px;background:rgba(255,255,255,.7);border:1px solid var(--line);gap:26px;width:max-content;max-width:100%;box-shadow:0 10px 30px rgba(15,26,77,.08)}
-  .tabbar i{width:44px;height:44px;border-radius:50%;background:var(--yellow);border:1.5px solid var(--navy);display:grid;place-items:center;font-style:normal;font-weight:900;color:var(--navy);font-size:18px}
-  .tabbar i.on{background:var(--navy);color:var(--yellow)}
-  .tabbar i.big{width:56px;height:56px;margin-top:-6px;font-size:26px}
+  /* closing CTA: same badge row as the hero (same --badge-h), QR beside it */
+  .cta-final{display:grid;grid-template-columns:1fr auto;gap:48px;align-items:center}
+  .cta-copy h2{font-size:clamp(34px,4.2vw,58px);line-height:1.03;letter-spacing:-.02em}
+  .cta-copy .fine{margin-top:12px}
+  .qr-card{background:var(--paper);border-radius:var(--r-s);padding:18px 18px 14px;box-shadow:0 18px 40px rgba(15,26,77,.14);text-align:center}
+  .qr-card .qr{display:block;width:168px;height:168px}
+  .qr-cap{margin-top:10px;font-size:12.5px;font-weight:700;color:var(--mute);max-width:168px}
+  /* the code prints itself in, top to bottom, once it is on screen */
+  html.js .qr-card .qr{clip-path:inset(0 0 100% 0);transition:clip-path .6s ease .12s}
+  html.js .qr-card.in .qr{clip-path:inset(0 0 0 0)}
+  @media (max-width:899px){
+    .qr-card{display:none}
+    .cta-final{grid-template-columns:1fr;text-align:center}
+    .cta-final .cta{justify-content:center}
+  }
 
   footer{padding-block:28px 56px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px;font-size:14px;color:var(--mute);font-weight:600}
   footer nav{display:flex;gap:18px;flex-wrap:wrap}
@@ -137,11 +218,53 @@
     .f.wide{grid-template-columns:1fr}
     .data{grid-template-columns:1fr}
     section{padding-block:44px}
-    .tabbar{gap:16px}
   }
   /* below ~430px the 54px pair (162 + 16 + 181) no longer fits the 335px content box at 375 */
   @media (max-width:430px){
     .cta{--badge-h:48px}
+  }
+  /* retail marquee: one row holding the list twice, shifted by exactly half its width */
+  .mq{overflow:hidden;border-block:1px solid var(--line);padding-block:12px;margin-top:4px}
+  .mq-row{display:flex;width:max-content;animation:mqslide 40s linear infinite}
+  .mq-set{display:flex;align-items:center;gap:18px;padding-right:18px;font-weight:800;font-size:14px;letter-spacing:.06em;color:var(--mute);white-space:nowrap}
+  .mq-set i{font-style:normal;color:var(--yellow)}
+  .mq:hover .mq-row{animation-play-state:paused}
+  @keyframes mqslide{to{transform:translateX(-50%)}}
+
+  /* ===== motion: transform/opacity only. The hidden half of each effect sits behind
+     html.js, so a JS-less page shows the finished state; state that must outlive the
+     language switch lives on <html>, never on a node apply() rewrites. */
+  /* length via scaleX, colour via a 3x-wide gradient sliding under the bar — never width */
+  .prog{position:fixed;inset:0 0 auto;height:3px;z-index:50;transform:scaleX(0);transform-origin:0 50%;background:linear-gradient(90deg,#7BA428,#F2C200,#8B5A2B);background-size:300% 100%}
+  /* the slab is a pseudo so it can scale; a rebuilt <em> is born matching html.mk and paints finished, so the switch cannot flicker */
+  .hero h1 em::after{content:"";position:absolute;z-index:-1;left:0;right:0;bottom:0;height:.4em;background:var(--yellow);transform:scaleX(1);transform-origin:0 50%;transition:transform .7s cubic-bezier(.22,1,.36,1)}
+  html.js .hero h1 em::after{transform:scaleX(0)}
+  html.js.mk .hero h1 em::after{transform:scaleX(1)}
+  /* the reveal list lives in CSS, not JS-added attributes, so the hidden state is in the first paint */
+  html.js :is(.sec-head,.data>div,.cta-copy,.qr-card){opacity:0;transform:translateY(24px);transition:opacity .6s ease,transform .6s cubic-bezier(.22,1,.36,1);transition-delay:var(--d,0ms)}
+  html.js :is(.sec-head,.data>div,.cta-copy,.qr-card).in{opacity:1;transform:none}
+  /* the keyframe spells out the whole transform and reads --rx/--ry inside it, so the tilt rides along instead of fighting for the property */
+  @keyframes floaty{0%,100%{transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) translateY(0)}50%{transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) translateY(-6px)}}
+  .hero .phone{animation:floaty 6s ease-in-out infinite}
+  /* the bar is exempt: it has no transition, it only tracks the scroll position */
+  @media (prefers-reduced-motion:reduce){
+    .hero .phone{animation:none}
+    .mq-row{animation:none}
+    .shots img{transition:none}
+    /* no pinning, no sliding: the steps are simply a list */
+    html.js .story{height:auto}
+    html.js .story-pin{position:static;height:auto}
+    html.js .slides{display:grid;gap:26px;overflow:visible;height:auto;scroll-snap-type:none}
+    html.js .sl{position:static;display:grid;pointer-events:auto}
+    html.js .sl-tx,html.js .sl-ph{opacity:1;transform:none;transition:none}
+    html.js .sl-ph{display:flex}
+    html.js .story-deck,html.js .sl-no{display:none}
+    .w{overflow:visible}
+    .w>span{transform:none!important;transition:none}
+    .mark .lt{transform:none!important}
+    .dot{transition:none}
+    html.js :is(.sec-head,.data>div,.cta-copy,.qr-card){opacity:1;transform:none;transition:none}
+    html.js .hero h1 em::after{transform:scaleX(1);transition:none}
   }
 </style>
 
@@ -149,7 +272,7 @@
 <body>
 <div class="wrap">
   <header class="nav">
-    <a class="mark" href="/" aria-label="nanafeed"><img src="img/logo-n.png" alt="">anafeed</a>
+    <a class="mark" href="/" aria-label="nanafeed"><img src="img/logo-n.png" alt=""><span class="word"><span class="lt">a</span><span class="lt">n</span><span class="lt">a</span><span class="lt">f</span><span class="lt">e</span><span class="lt">e</span><span class="lt">d</span></span></a>
     <div class="lang" role="group" aria-label="Language">
       <button type="button" id="lang-en" data-lang="en" aria-pressed="true">EN</button>
       <button type="button" id="lang-uk" data-lang="uk" aria-pressed="false">UA</button>
@@ -176,58 +299,80 @@
     <div class="phone"><img src="img/post.jpg" alt="nanafeed post: Bananiv bananas rated in Fora, Haisyn — brand, ripeness meter, price, taste stars" width="640" height="1308"></div>
   </section>
 
-  <section id="how">
-    <div class="sec-head">
-      <h2 data-en="How it works" data-uk="Як це працює">How it works</h2>
-      <p data-en="Thirty seconds in the kitchen. The rest happens on its own." data-uk="Тридцять секунд на кухні. Решта відбувається сама.">Thirty seconds in the kitchen. The rest happens on its own.</p>
-    </div>
-    <div class="steps">
-      <div class="step"><h3 data-en="Shoot the banana" data-uk="Сфоткай банан">Shoot the banana</h3><p data-en="The app checks it is a real banana before anything is posted, so the feed stays fruit, not noise." data-uk="Застосунок перевіряє, що це справжній банан, ще до публікації — тому стрічка лишається фруктом, а не шумом.">The app checks it is a real banana before anything is posted, so the feed stays fruit, not noise.</p></div>
-      <div class="step"><h3 data-en="Rate it" data-uk="Оціни">Rate it</h3><p data-en="Taste 1–5, sweetness, ripeness 1–5, price per kilo, the shop, and whether you’d buy it again. Peel the sticker into your collection." data-uk="Смак 1–5, солодкість, стиглість 1–5, ціна за кіло, магазин і чи купив би знову. Наліпку — в колекцію.">Taste 1–5, sweetness, ripeness 1–5, price per kilo, the shop, and whether you’d buy it again. Peel the sticker into your collection.</p></div>
-      <div class="step"><h3 data-en="See the map" data-uk="Дивись мапу">See the map</h3><p data-en="Every rating lands on a store. Open the map and see where the bananas are actually good — and where they’re green and hard." data-uk="Кожна оцінка лягає на магазин. Відкрий мапу і побач, де банани справді смачні, а де — зелені й тверді.">Every rating lands on a store. Open the map and see where the bananas are actually good — and where they’re green and hard.</p></div>
-    </div>
-  </section>
 
-  <section id="features">
-    <div class="sec-head">
-      <h2 data-en="What’s inside" data-uk="Що всередині">What’s inside</h2>
-      <p data-en="Real screens from the current build, not mockups." data-uk="Справжні екрани з поточної версії, не макети.">Real screens from the current build, not mockups.</p>
+  <div class="mq" aria-hidden="true">
+    <div class="mq-row">
+      <div class="mq-set"><span>REWE</span><i>·</i><span>EDEKA</span><i>·</i><span>Lidl</span><i>·</i><span>Aldi</span><i>·</i><span>Mercadona</span><i>·</i><span>Carrefour</span><i>·</i><span>Biedronka</span><i>·</i><span>Żabka</span><i>·</i><span>Pingo Doce</span><i>·</i><span>Conad</span><i>·</i><span>Сільпо</span><i>·</i><span>АТБ</span><i>·</i><span>Фора</span><i>·</i><span>Новус</span><i>·</i></div>
+      <div class="mq-set"><span>REWE</span><i>·</i><span>EDEKA</span><i>·</i><span>Lidl</span><i>·</i><span>Aldi</span><i>·</i><span>Mercadona</span><i>·</i><span>Carrefour</span><i>·</i><span>Biedronka</span><i>·</i><span>Żabka</span><i>·</i><span>Pingo Doce</span><i>·</i><span>Conad</span><i>·</i><span>Сільпо</span><i>·</i><span>АТБ</span><i>·</i><span>Фора</span><i>·</i><span>Новус</span><i>·</i></div>
     </div>
-    <div class="feat">
-      <div class="f wide">
-        <div class="txt">
-          <span class="badge"><span data-en="Camera" data-uk="Камера">Camera</span></span>
-          <h3 data-en="Ripeness meter" data-uk="Стигломір">Ripeness meter</h3>
-          <p data-en="Point the camera at a banana and get its ripeness on a 1–5 scale with a plain tip: eat today, wait two days, bake bread. Calibrated to the scale real traders use, not to stock photos." data-uk="Наведи камеру на банан і отримай стиглість за шкалою 1–5 з простою порадою: їж сьогодні, почекай два дні, печи хліб. Відкалібровано за шкалою справжніх трейдерів, а не за стоковими фото.">Point the camera at a banana and get its ripeness on a 1–5 scale with a plain tip: eat today, wait two days, bake bread. Calibrated to the scale real traders use, not to stock photos.</p>
-          <div class="meta"><span data-en="&lt;b&gt;3 of 5&lt;/b&gt;" data-uk="&lt;b&gt;3 з 5&lt;/b&gt;"><b>3 of 5</b></span><span data-en="Ripe — eat today or tomorrow" data-uk="Стиглий — їж сьогодні або завтра">Ripe — eat today or tomorrow</span></div>
-        </div>
-        <div class="shotbox"><div class="phone sm"><img src="img/ripeness.jpg" alt="Ripeness meter result: 3 of 5, ripe, eat today or tomorrow" width="640" height="1308" loading="lazy"></div></div>
+  </div>
+
+  <section class="story" id="how">
+    <div class="story-pin">
+      <p class="eyebrow story-eyebrow" data-en="How it works" data-uk="Як це працює">How it works</p>
+      <div class="story-meta">
+          <span class="story-count"><b class="story-k">01</b> / 04</span>
+          <span class="dots">
+            <button type="button" class="dot on" data-go="0" aria-label="Step 1"></button>
+            <button type="button" class="dot" data-go="1" aria-label="Step 2"></button>
+            <button type="button" class="dot" data-go="2" aria-label="Step 3"></button>
+            <button type="button" class="dot" data-go="3" aria-label="Step 4"></button>
+          </span>
       </div>
-      <div class="f">
-        <div class="txt">
-          <span class="badge"><span data-en="Social" data-uk="Соціальне">Social</span></span>
-          <h3 data-en="“I tasted it too”" data-uk="«Теж куштував»">“I tasted it too”</h3>
-          <p data-en="Bought the same banana? Confirm someone’s post with your own taste and ripeness. Three people agree and the rating stops being one person’s opinion." data-uk="Купив той самий банан? Підтверди чужий пост своєю оцінкою смаку і стиглості. Троє погодилися — і оцінка перестає бути думкою однієї людини.">Bought the same banana? Confirm someone’s post with your own taste and ripeness. Three people agree and the rating stops being one person’s opinion.</p>
-          <div class="meta"><b>Bananiv <span class="ok">✓</span></b><span>5★</span><span data-en="ripeness 5/5" data-uk="стиглість 5/5">ripeness 5/5</span><span data-en="1 tasted too" data-uk="1 теж куштував">1 tasted too</span></div>
-        </div>
-        <div class="shotbox"><div class="phone sm"><img src="img/cosign.jpg" alt="Feed post with the “tasted it too” confirmation" width="640" height="1308" loading="lazy"></div></div>
+      <div class="story-main">
+      <div class="slides">
+
+        <article class="sl on">
+          <div class="sl-ph"><div class="phone sm"><img src="img/ripeness.jpg" alt="Ripeness meter: 3 of 5, ripe, eat today or tomorrow" width="640" height="1308"></div></div>
+          <div class="sl-tx">
+            <span class="sl-no" aria-hidden="true">01</span>
+            <span class="badge"><span data-en="Camera" data-uk="Камера">Camera</span></span>
+            <h3 data-en="Ripeness meter" data-uk="Стигломір">Ripeness meter</h3>
+            <p data-en="Point the camera at a banana and get its ripeness on a 1–5 scale with a plain tip: eat today, wait two days, bake bread. Calibrated to the scale real traders use, not to stock photos." data-uk="Наведи камеру на банан і отримай стиглість за шкалою 1–5 з простою порадою: їж сьогодні, почекай два дні, печи хліб. Відкалібровано за шкалою справжніх трейдерів, а не за стоковими фото.">Point the camera at a banana and get its ripeness on a 1–5 scale with a plain tip: eat today, wait two days, bake bread. Calibrated to the scale real traders use, not to stock photos.</p>
+          </div>
+        </article>
+
+        <article class="sl">
+          <div class="sl-ph"><div class="phone sm"><img src="img/post.jpg" alt="Post details: brand, ripeness meter, price, taste stars" width="640" height="1308" loading="lazy"></div></div>
+          <div class="sl-tx">
+            <span class="sl-no" aria-hidden="true">02</span>
+            <span class="badge"><span data-en="Rating" data-uk="Оцінка">Rating</span></span>
+            <h3 data-en="Rate it" data-uk="Оціни">Rate it</h3>
+            <p data-en="Taste 1–5, sweetness, ripeness 1–5, price per kilo, the shop, and whether you’d buy it again. Peel the sticker into your collection." data-uk="Смак 1–5, солодкість, стиглість 1–5, ціна за кіло, магазин і чи купив би знову. Наліпку — в колекцію.">Taste 1–5, sweetness, ripeness 1–5, price per kilo, the shop, and whether you’d buy it again. Peel the sticker into your collection.</p>
+          </div>
+        </article>
+
+        <article class="sl">
+          <div class="sl-ph"><div class="phone sm"><img src="img/cosign.jpg" alt="Feed post with the “tasted it too” confirmation" width="640" height="1308" loading="lazy"></div></div>
+          <div class="sl-tx">
+            <span class="sl-no" aria-hidden="true">03</span>
+            <span class="badge"><span data-en="Social" data-uk="Соціальне">Social</span></span>
+            <h3 data-en="“I tasted it too”" data-uk="«Теж куштував»">“I tasted it too”</h3>
+            <p data-en="Bought the same banana? Confirm someone’s post with your own taste and ripeness. Three people agree and the rating stops being one person’s opinion." data-uk="Купив той самий банан? Підтверди чужий пост своєю оцінкою смаку і стиглості. Троє погодилися — і оцінка перестає бути думкою однієї людини.">Bought the same banana? Confirm someone’s post with your own taste and ripeness. Three people agree and the rating stops being one person’s opinion.</p>
+          </div>
+        </article>
+
+        <article class="sl">
+          <div class="sl-ph"><div class="phone sm"><img src="img/map.jpg" alt="Map of Europe with banana markers where users rated" width="640" height="1308" loading="lazy"></div></div>
+          <div class="sl-tx">
+            <span class="sl-no" aria-hidden="true">04</span>
+            <span class="badge"><span data-en="Map" data-uk="Мапа">Map</span></span>
+            <h3 data-en="See the map" data-uk="Дивись мапу">See the map</h3>
+            <p class="story-big"><b class="story-stat" data-en="61,307" data-uk="61&nbsp;307">61,307</b> <span data-en="stores on the map" data-uk="магазинів на мапі">stores on the map</span></p>
+            <p data-en="Across Ukraine, Germany, Poland, France, Spain, Italy and Portugal. Filter by chain and radius; the shelf ripeness index shows where enough people rated." data-uk="Україна, Німеччина, Польща, Франція, Іспанія, Італія, Португалія. Фільтр за мережею і радіусом; індекс стиглості полиці — там, де оцінила достатня кількість людей.">Across Ukraine, Germany, Poland, France, Spain, Italy and Portugal. Filter by chain and radius; the shelf ripeness index shows where enough people rated.</p>
+          </div>
+        </article>
+
       </div>
-      <div class="f">
-        <div class="txt">
-          <span class="badge"><span data-en="Map" data-uk="Мапа">Map</span></span>
-          <h3 data-en="Every shop, seven countries" data-uk="Кожен магазин, сім країн">Every shop, seven countries</h3>
-          <p data-en="61,307 retail locations already on the map across Ukraine, Germany, Poland, France, Spain, Italy and Portugal. Filter by chain and radius; the shelf ripeness index shows where enough people rated." data-uk="61&nbsp;307 магазинів уже на мапі: Україна, Німеччина, Польща, Франція, Іспанія, Італія, Португалія. Фільтр за мережею і радіусом; індекс стиглості полиці — там, де оцінила достатня кількість людей.">61,307 retail locations already on the map across Ukraine, Germany, Poland, France, Spain, Italy and Portugal. Filter by chain and radius; the shelf ripeness index shows where enough people rated.</p>
-        </div>
-        <div class="shotbox"><div class="phone sm"><img src="img/map.jpg" alt="Map of Europe with banana markers where users rated" width="640" height="1308" loading="lazy"></div></div>
+      <div class="story-deck" aria-hidden="true">
+        <span class="deck-shadow"></span>
+        <div class="phone sm"><div class="deck">
+          <img src="img/ripeness.jpg" alt="" width="640" height="1308">
+          <img src="img/post.jpg" alt="" width="640" height="1308" loading="lazy">
+          <img src="img/cosign.jpg" alt="" width="640" height="1308" loading="lazy">
+          <img src="img/map.jpg" alt="" width="640" height="1308" loading="lazy">
+        </div></div>
       </div>
-      <div class="f wide">
-        <div class="txt">
-          <span class="badge"><span data-en="Collection" data-uk="Колекція">Collection</span></span>
-          <h3 data-en="Your banana profile" data-uk="Твій банановий профіль">Your banana profile</h3>
-          <p data-en="Favourite brand, most frequent origin, countries you’ve tasted, your own banana map and a sticker album cropped straight from your photos: Chiquita, Dole, Del Monte, Rewe Bio, a no-name from a market in Lisbon." data-uk="Улюблений бренд, найчастіша країна, з яких країн куштував, власна бананова карта і альбом наліпок, вирізаних просто з твоїх фото: Chiquita, Dole, Del Monte, Rewe Bio, ноунейм з ринку в Лісабоні.">Favourite brand, most frequent origin, countries you’ve tasted, your own banana map and a sticker album cropped straight from your photos: Chiquita, Dole, Del Monte, Rewe Bio, a no-name from a market in Lisbon.</p>
-          <div class="meta"><span data-en="Favourite brand" data-uk="Улюблений бренд">Favourite brand</span><b>Dole Gourmet Orito</b><span data-en="Countries" data-uk="Країни">Countries</span><b>6</b></div>
-        </div>
-        <div class="shotbox"><div class="phone sm"><img src="img/profile.jpg" alt="Profile: favourite brand, countries, personal banana map and sticker album" width="640" height="1308" loading="lazy"></div></div>
       </div>
     </div>
   </section>
@@ -246,7 +391,27 @@
         <div class="n"><b data-en="61,307" data-uk="61&nbsp;307">61,307</b><span data-en="stores on the map" data-uk="магазинів на мапі">stores on the map</span></div>
       </div>
     </div>
-    <div class="tabbar" aria-hidden="true"><i class="on">⌂</i><i>◫</i><i class="big">+</i><i>▥</i><i>◯</i></div>
+  </section>
+
+  <section id="get">
+    <div class="cta-final">
+      <div class="cta-copy">
+        <h2 data-en="Your next banana is waiting." data-uk="Твій наступний банан чекає на оцінку.">Your next banana is waiting.</h2>
+        <p class="fine" data-en="Free. 30 seconds. One honest rating." data-uk="Безкоштовно. 30 секунд. Одна чесна оцінка.">Free. 30 seconds. One honest rating.</p>
+        <div class="cta">
+          <a class="appstore" href="https://apps.apple.com/app/id6766258928" target="_blank" rel="noopener">
+            <img src="img/app-store-badge.svg" alt="Download on the App Store" width="162" height="54">
+          </a>
+          <a class="googleplay" href="https://play.google.com/store/apps/details?id=com.bananiv.nanafeed" target="_blank" rel="noopener">
+            <img src="img/google-play-badge.png" alt="Get it on Google Play" width="207" height="80">
+          </a>
+        </div>
+      </div>
+      <div class="qr-card">
+        <svg class="qr" viewBox="0 0 33 33" shape-rendering="crispEdges" role="img" aria-label="QR code for nanafeed.io/get"><rect width="33" height="33" fill="#fff"/><path d="M4 4h7v1h-7zM13 4h1v1h-1zM17 4h1v1h-1zM20 4h1v1h-1zM22 4h7v1h-7zM4 5h1v1h-1zM10 5h1v1h-1zM13 5h3v1h-3zM19 5h1v1h-1zM22 5h1v1h-1zM28 5h1v1h-1zM4 6h1v1h-1zM6 6h3v1h-3zM10 6h1v1h-1zM12 6h2v1h-2zM18 6h1v1h-1zM20 6h1v1h-1zM22 6h1v1h-1zM24 6h3v1h-3zM28 6h1v1h-1zM4 7h1v1h-1zM6 7h3v1h-3zM10 7h1v1h-1zM12 7h7v1h-7zM22 7h1v1h-1zM24 7h3v1h-3zM28 7h1v1h-1zM4 8h1v1h-1zM6 8h3v1h-3zM10 8h1v1h-1zM12 8h6v1h-6zM22 8h1v1h-1zM24 8h3v1h-3zM28 8h1v1h-1zM4 9h1v1h-1zM10 9h1v1h-1zM12 9h1v1h-1zM17 9h3v1h-3zM22 9h1v1h-1zM28 9h1v1h-1zM4 10h7v1h-7zM12 10h1v1h-1zM14 10h1v1h-1zM16 10h1v1h-1zM18 10h1v1h-1zM20 10h1v1h-1zM22 10h7v1h-7zM12 11h5v1h-5zM18 11h3v1h-3zM4 12h1v1h-1zM6 12h5v1h-5zM16 12h2v1h-2zM19 12h1v1h-1zM22 12h5v1h-5zM6 13h4v1h-4zM11 13h2v1h-2zM14 13h1v1h-1zM17 13h1v1h-1zM20 13h1v1h-1zM23 13h1v1h-1zM27 13h1v1h-1zM8 14h3v1h-3zM12 14h1v1h-1zM16 14h5v1h-5zM22 14h1v1h-1zM24 14h2v1h-2zM27 14h2v1h-2zM4 15h2v1h-2zM7 15h2v1h-2zM11 15h3v1h-3zM18 15h7v1h-7zM28 15h1v1h-1zM4 16h2v1h-2zM9 16h2v1h-2zM13 16h7v1h-7zM21 16h2v1h-2zM24 16h1v1h-1zM26 16h3v1h-3zM4 17h1v1h-1zM6 17h1v1h-1zM9 17h1v1h-1zM11 17h2v1h-2zM20 17h1v1h-1zM23 17h1v1h-1zM25 17h1v1h-1zM27 17h1v1h-1zM4 18h1v1h-1zM10 18h1v1h-1zM12 18h10v1h-10zM23 18h3v1h-3zM27 18h2v1h-2zM4 19h1v1h-1zM7 19h1v1h-1zM13 19h3v1h-3zM18 19h3v1h-3zM23 19h2v1h-2zM28 19h1v1h-1zM4 20h1v1h-1zM6 20h1v1h-1zM8 20h3v1h-3zM13 20h3v1h-3zM17 20h8v1h-8zM26 20h1v1h-1zM12 21h3v1h-3zM16 21h1v1h-1zM19 21h2v1h-2zM24 21h2v1h-2zM4 22h7v1h-7zM13 22h1v1h-1zM18 22h1v1h-1zM20 22h1v1h-1zM22 22h1v1h-1zM24 22h1v1h-1zM26 22h3v1h-3zM4 23h1v1h-1zM10 23h1v1h-1zM12 23h2v1h-2zM16 23h1v1h-1zM18 23h1v1h-1zM20 23h1v1h-1zM24 23h2v1h-2zM27 23h1v1h-1zM4 24h1v1h-1zM6 24h3v1h-3zM10 24h1v1h-1zM12 24h1v1h-1zM14 24h1v1h-1zM16 24h9v1h-9zM26 24h3v1h-3zM4 25h1v1h-1zM6 25h3v1h-3zM10 25h1v1h-1zM12 25h1v1h-1zM14 25h1v1h-1zM18 25h5v1h-5zM24 25h5v1h-5zM4 26h1v1h-1zM6 26h3v1h-3zM10 26h1v1h-1zM12 26h2v1h-2zM15 26h2v1h-2zM18 26h1v1h-1zM25 26h2v1h-2zM28 26h1v1h-1zM4 27h1v1h-1zM10 27h1v1h-1zM13 27h3v1h-3zM19 27h2v1h-2zM22 27h4v1h-4zM28 27h1v1h-1zM4 28h7v1h-7zM12 28h1v1h-1zM15 28h2v1h-2zM21 28h8v1h-8z" fill="#0F1A4D"/></svg>
+        <p class="qr-cap" data-en="Point your phone camera here" data-uk="Наведи камеру телефона">Point your phone camera here</p>
+      </div>
+    </div>
   </section>
 
   <footer>
@@ -277,6 +442,223 @@
   try{ start = localStorage.getItem(KEY) || ((navigator.language||'').toLowerCase().indexOf('uk')===0 ? 'uk' : 'en'); }catch(e){}
   apply(start);
   document.querySelectorAll('.lang button').forEach(function(b){ b.addEventListener('click', function(){ apply(b.dataset.lang); }); });
+})();
+</script>
+
+<script>
+/* Motion. Runs after the i18n block, so html.lang is already settled.
+   One rAF pass per scroll drives the bar, the reveal and the pinned story. */
+(function(){
+  const html = document.documentElement;
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const RV = '.sec-head,.data>div,.cta-copy,.qr-card';
+  const showAll = () => document.querySelectorAll(RV).forEach(el => el.classList.add('in'));
+
+try {
+  /* Who actually scrolls: the scrolling element, not an assumed window.pageYOffset. Its
+     scroll event lands on window/document, so both are wired up, and a <body> scroller
+     gets its own listener too. */
+  const scroller = () => document.scrollingElement || document.documentElement;
+
+  const bar = document.body.appendChild(document.createElement('div'));
+  bar.className = 'prog';
+
+  let pending = [...document.querySelectorAll(RV)];
+  let queued = false, ticks = 0, last = -1;
+
+  const reveal = () => {
+    if (!pending.length) return;
+    const h = innerHeight * .92;
+    pending = pending.filter(el => {
+      if (el.getBoundingClientRect().top >= h) return true;
+      el.classList.add('in');
+      return false;
+    });
+  };
+
+  /* ---------- pinned story ---------- */
+  const story  = document.querySelector('.story');
+  const box    = document.querySelector('.slides');
+  const slides = [...document.querySelectorAll('.sl')];
+  const dots   = [...document.querySelectorAll('.dot')];
+  const kEl    = document.querySelector('.story-k');
+  const N = slides.length;
+  let act = -1;
+  /* pinned above 900px only; below that the same slides are a snap carousel */
+  const pinned = () => !reduce && matchMedia('(min-width:900px)').matches;
+
+  /* --- words: each is a mask with a span inside that slides up. i18n rewrites innerHTML
+     on every language switch, so the split is redone from the fresh text. --- */
+  const WORDS = '.sl-tx h3,.sl-tx p:not(.story-big)';
+  const split = el => {
+    const text = el.textContent;
+    el.textContent = '';
+    text.split(/(\s+)/).forEach(part => {
+      if (!part) return;
+      if (!part.trim()) return el.appendChild(document.createTextNode(part));
+      const mask = document.createElement('span');
+      mask.className = 'w';
+      const inner = document.createElement('span');
+      inner.textContent = part;
+      mask.appendChild(inner);
+      el.appendChild(mask);
+    });
+    [...el.querySelectorAll('.w>span')].forEach((w, i) => w.style.transitionDelay = i * 35 + 'ms');
+  };
+  const splitAll = () => document.querySelectorAll(WORDS).forEach(split);
+  splitAll();
+  /* runs after the i18n handler on the same click, so the text is already swapped */
+  document.querySelectorAll('.lang button').forEach(b => b.addEventListener('click', splitAll));
+
+  const setStep = k => {
+    if (k === act || k < 0 || k >= N) return;
+    const prev = act;
+    act = k;
+    slides.forEach((el, i) => {
+      el.classList.toggle('on', i === k);
+      el.classList.toggle('pv', i < k);
+    });
+    if (prev >= 0 && slides[prev]) {
+      const old = slides[prev];
+      old.classList.add('out');                 /* the leaving words exit upward */
+      setTimeout(() => old.classList.remove('out'), 320);
+    }
+    dots.forEach((d, i) => d.classList.toggle('on', i === k));
+    if (kEl) kEl.textContent = String(k + 1).padStart(2, '0');
+  };
+
+  /* --- the deck. Every frame writes transform straight into style from the scroll
+     position, so stopping the scroll freezes the cards mid-flight. The last 35% of a
+     step's slice is the hand-off: one card lifts out as the next flies up. --- */
+  const deck = [...document.querySelectorAll('.deck img')];
+  const shadow = document.querySelector('.deck-shadow');
+  const place = (img, y, sc, rot, op) => {
+    img.style.transform = 'translateY(' + y + '%) scale(' + sc + ') rotate(' + rot + 'deg)';
+    img.style.opacity = op;
+  };
+  const drawDeck = (k, t) => {
+    if (!deck.length) return;
+    /* the hand-off only exists between two steps: on the last there is no next card, so
+       the map stays put until the pin lets go; below the first, the clamp on `local`
+       already holds t at 0. */
+    const u = (k >= deck.length - 1 || t <= .65) ? 0 : (t - .65) / .35;
+    deck.forEach((img, i) => {
+      if (i === k)          place(img, -60 * u, 1 - .15 * u, -4 * u, 1 - u);
+      else if (i === k + 1) place(img, 100 * (1 - u), .9 + .1 * u, 6 * (1 - u), u);
+      else                  place(img, i < k ? -60 : 100, .9, 0, 0);
+    });
+    /* the shadow breathes while a card is in the air */
+    const lift = Math.sin(u * Math.PI);
+    if (shadow) shadow.style.transform = 'translateX(-50%) scaleX(' + (1 - .18 * lift) + ')',
+                shadow.style.opacity = (.55 - .25 * lift).toFixed(3);
+  };
+
+  const stepFromScroll = () => {
+    if (!story || !pinned()) return;
+    const range = story.offsetHeight - innerHeight;
+    if (range <= 0) return;
+    const local = Math.min(1, Math.max(0, -story.getBoundingClientRect().top / range));
+    const exact = Math.min(N - .0001, local * N);
+    const k = Math.floor(exact);
+    setStep(k);
+    drawDeck(k, exact - k);
+  };
+
+  if (box) box.addEventListener('scroll', () => {
+    if (!pinned() && box.clientWidth) setStep(Math.round(box.scrollLeft / box.clientWidth));
+  }, {passive:true});
+
+  dots.forEach((d, i) => d.addEventListener('click', () => {
+    if (pinned()) {
+      /* land in the middle of that step's slice so it is unambiguously active */
+      const range = story.offsetHeight - innerHeight;
+      scrollTo({top: story.offsetTop + range * ((i + .5) / N), behavior: reduce ? 'auto' : 'smooth'});
+    } else if (box) {
+      box.scrollTo({left: i * box.clientWidth, behavior: reduce ? 'auto' : 'smooth'});
+    }
+  }));
+
+  const update = () => {
+    queued = false; ticks++;
+    const el = scroller();
+    const max = el.scrollHeight - el.clientHeight;
+    const p = max > 0 ? Math.min(1, Math.max(0, el.scrollTop / max)) : 0;
+    reveal(); stepFromScroll();
+    if (Math.abs(p - last) < .0015) return;
+    last = p;
+    bar.style.transform = 'scaleX(' + p + ')';
+    bar.style.backgroundPosition = (p * 100) + '% 0';
+  };
+
+  const tick = () => { if (!queued) { queued = true; requestAnimationFrame(update); } };
+  addEventListener('scroll', tick, {passive:true});
+  document.addEventListener('scroll', tick, {passive:true});
+  const se = scroller();
+  if (se && se !== html) se.addEventListener('scroll', tick, {passive:true});
+  addEventListener('resize', tick, {passive:true});
+  setStep(0);
+  if (pinned()) stepFromScroll(); else drawDeck(0, 0);
+  update();
+
+  /* Nothing may stay invisible: if the loop never ran, show everything outright. */
+  setTimeout(() => { ticks ? update() : showAll(); }, 2000);
+
+  /* ---------- kept: marker, counters, hero float, cursor tilt ---------- */
+  requestAnimationFrame(() => requestAnimationFrame(() => html.classList.add('mk')));
+
+  const lang = () => html.lang === 'uk' ? 'uk' : 'en';
+  const group = n => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, lang() === 'uk' ? ' ' : ',');
+  const settle = (el, v) => el.innerHTML = el.getAttribute('data-' + lang()) || group(v);
+  /* counts the figures once their block scrolls into view */
+  const counter = (els, box) => {
+    if (!box || !els.length) return;
+    let ran = false;
+    const maybe = () => {
+      if (ran || box.getBoundingClientRect().top > innerHeight * .9) return;
+      ran = true;
+      removeEventListener('scroll', maybe);
+      els.forEach(el => {
+        const target = parseInt((el.textContent || '').replace(/\D/g, ''), 10) || 0;
+        if (reduce) return settle(el, target);
+        let t0 = 0;
+        requestAnimationFrame(function step(ts){
+          t0 = t0 || ts;
+          const k = Math.min(1, (ts - t0) / 1200);
+          if (k === 1) return settle(el, target);
+          el.innerHTML = group(Math.round(target * (1 - Math.pow(1 - k, 3))));
+          requestAnimationFrame(step);
+        });
+      });
+    };
+    addEventListener('scroll', maybe, {passive:true});
+    maybe();
+    setTimeout(maybe, 2000);
+  };
+  counter([...document.querySelectorAll('.nums .n b')], document.querySelector('.nums'));
+  counter([...document.querySelectorAll('.story-stat')], story);
+
+  const phone = document.querySelector('.hero .phone');
+  if (phone && !reduce && matchMedia('(hover: hover)').matches) {
+    let wx = 0, wy = 0, ax = 0, ay = 0, raf = 0;
+    const ease = () => {
+      ax += (wx - ax) * .12; ay += (wy - ay) * .12;
+      phone.style.setProperty('--ry', ax.toFixed(2) + 'deg');
+      phone.style.setProperty('--rx', ay.toFixed(2) + 'deg');
+      raf = (Math.abs(wx - ax) > .01 || Math.abs(wy - ay) > .01) ? requestAnimationFrame(ease) : 0;
+    };
+    const nudge = () => { if (!raf) raf = requestAnimationFrame(ease); };
+    phone.addEventListener('mousemove', e => {
+      const r = phone.getBoundingClientRect();
+      wx = ((e.clientX - r.left) / r.width - .5) * 12;   /* +/- 6deg */
+      wy = (.5 - (e.clientY - r.top) / r.height) * 12;
+      nudge();
+    });
+    phone.addEventListener('mouseleave', () => { wx = wy = 0; nudge(); });
+  }
+} catch (e) {
+  showAll();                                    /* a thrown error must not hide the page */
+  console.error('[nanafeed] motion disabled:', e);
+}
 })();
 </script>
 

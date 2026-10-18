@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>nanafeed — get the app</title>
+<meta name="description" content="Opening the nanafeed app store listing for your phone.">
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/png" href="img/favicon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="nanafeed">
+<meta property="og:title" content="nanafeed — get the app">
+<meta property="og:description" content="Opening the nanafeed app store listing for your phone.">
+<meta property="og:image" content="https://nanafeed.io/linkedin_cover.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="627">
+<meta property="og:image:alt" content="nanafeed — the social app about bananas">
+<meta property="og:url" content="https://nanafeed.io/get">
+<meta property="og:locale" content="en_US">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="nanafeed — get the app">
+<meta name="twitter:description" content="Opening the nanafeed app store listing for your phone.">
+<meta name="twitter:image" content="https://nanafeed.io/linkedin_cover.png">
+<script>
+/* Runs before the body paints, so a phone never sees the fallback flash by.
+   iPadOS reports itself as Macintosh, hence the touch-point check. */
+(function(){
+  var ua = navigator.userAgent;
+  var ios = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+  if (ios) return location.replace('https://apps.apple.com/app/id6766258928');
+  if (/Android/.test(ua)) return location.replace('https://play.google.com/store/apps/details?id=com.bananiv.nanafeed');
+  /* anything else just stays here with both badges */
+})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800;900&display=swap">
+<style>
+  :root{--navy:#0F1A4D;--ink-2:#5B6488;--mute:#8E95B3;--yellow:#F5C800;--bg:#F9F9F9;
+        --font:"Nunito",-apple-system,BlinkMacSystemFont,"SF Pro Rounded","Segoe UI",Roboto,sans-serif}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--navy);font-family:var(--font);font-size:17px;line-height:1.5;
+       min-height:100svh;display:grid;place-items:center;padding:24px;-webkit-font-smoothing:antialiased}
+  .box{text-align:center;max-width:460px}
+  .mark{display:inline-flex;align-items:center;gap:10px;text-decoration:none;font-weight:900;font-size:22px;
+        color:var(--navy);letter-spacing:-.02em}
+  .mark img{height:30px;width:auto;display:block}
+  h1{font-size:22px;font-weight:800;margin:26px 0 6px}
+  p{margin:0;color:var(--ink-2);font-weight:600;font-size:15px}
+  /* same badge sizing as the landing page: Google bakes clear space into its file,
+     so its canvas is scaled up and the extra is pulled back in with a negative margin */
+  .cta{display:flex;flex-wrap:wrap;gap:16px;justify-content:center;margin-top:24px;--badge-h:54px}
+  .appstore,.googleplay{display:inline-flex;align-items:center;text-decoration:none;border-radius:8px}
+  .appstore img{display:block;height:var(--badge-h);width:auto}
+  .googleplay img{display:block;height:calc(var(--badge-h)/.672);width:auto;margin:calc(var(--badge-h) * -.244)}
+  .appstore:focus-visible,.googleplay:focus-visible{outline:2px solid var(--navy);outline-offset:3px}
+  .back{display:inline-block;margin-top:22px;font-size:13px;font-weight:700;color:var(--mute)}
+  @media (max-width:430px){.cta{--badge-h:48px}}
+</style>
+</head>
+<body>
+<div class="box">
+  <a class="mark" href="/" aria-label="nanafeed"><img src="img/logo-n.png" alt="">anafeed</a>
+  <h1>Opening the store…</h1>
+  <p>If nothing happens, pick your store below.</p>
+  <div class="cta">
+    <a class="appstore" href="https://apps.apple.com/app/id6766258928" rel="noopener">
+      <img src="img/app-store-badge.svg" alt="Download on the App Store" width="162" height="54">
+    </a>
+    <a class="googleplay" href="https://play.google.com/store/apps/details?id=com.bananiv.nanafeed" rel="noopener">
+      <img src="img/google-play-badge.png" alt="Get it on Google Play" width="207" height="80">
+    </a>
+  </div>
+  <a class="back" href="/">nanafeed.io</a>
+</div>
+</body>
+</html>
