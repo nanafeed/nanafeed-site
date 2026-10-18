@@ -56,14 +56,21 @@
   .hero h1{font-size:clamp(36px,5.4vw,64px);line-height:1.02;font-weight:900}
   .hero h1 em{font-style:normal;background:linear-gradient(transparent 60%,var(--yellow) 60%);padding:0 .05em;-webkit-box-decoration-break:clone;box-decoration-break:clone}
   .lede{font-size:clamp(17px,1.5vw,20px);color:var(--ink-2);max-width:32em;margin-top:20px;font-weight:600}
-  .cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px;align-items:center}
-  .store{display:inline-flex;align-items:center;gap:10px;background:var(--navy);color:var(--yellow);text-decoration:none;border-radius:999px;padding:13px 22px;font-weight:800;line-height:1.1;min-height:54px}
-  .store small{display:block;font-size:12px;font-weight:700;color:#C9CDE0;letter-spacing:.03em}
-  .store svg{width:22px;height:22px;flex:none}
-  /* official Apple badge: used unmodified, min 40px tall, clear space kept by the .cta gap */
-  .appstore{display:inline-flex;align-items:center;text-decoration:none;border-radius:8px}
-  .appstore img{display:block;height:54px;width:auto}
-  .appstore:focus-visible{outline:2px solid var(--navy);outline-offset:3px}
+  /* --badge-h is the VISIBLE button height, shared by both badges (see .googleplay img).
+     16px gap, not 12: the Play badge carries transparent clear space that would otherwise
+     overlap the Apple badge and steal ~1px of its click area. */
+  .cta{display:flex;flex-wrap:wrap;gap:16px;margin-top:28px;align-items:center;--badge-h:54px}
+  /* official store badges, both used unmodified, min 40px tall */
+  .appstore,.googleplay{display:inline-flex;align-items:center;text-decoration:none;border-radius:8px}
+  .appstore img{display:block;height:var(--badge-h);width:auto}
+  /* Google ships the Play badge with its clear space BAKED INTO the file: the 646x250 canvas
+     holds a 564x168 button, so the artwork is only 67.2% of the file height. Scaling the
+     canvas to --badge-h/0.672 makes the visible button exactly --badge-h, i.e. the same
+     height as the Apple badge; the negative margin (0.244 * --badge-h = half the padding,
+     scaled) absorbs the transparent frame so the row keeps its height and both buttons sit
+     on one baseline. Math in CSS, the PNG itself untouched. */
+  .googleplay img{display:block;height:calc(var(--badge-h)/.672);width:auto;margin:calc(var(--badge-h) * -.244)}
+  .appstore:focus-visible,.googleplay:focus-visible{outline:2px solid var(--navy);outline-offset:3px}
   .fine{font-size:14px;color:var(--mute);margin-top:14px;font-weight:600}
 
   /* phone frame with real screenshot */
@@ -132,6 +139,10 @@
     section{padding-block:44px}
     .tabbar{gap:16px}
   }
+  /* below ~430px the 54px pair (162 + 16 + 181) no longer fits the 335px content box at 375 */
+  @media (max-width:430px){
+    .cta{--badge-h:48px}
+  }
 </style>
 
 </head>
@@ -155,13 +166,12 @@
         <a class="appstore" id="btn-ios" href="https://apps.apple.com/app/id6766258928" target="_blank" rel="noopener">
           <img src="img/app-store-badge.svg" alt="Download on the App Store" width="162" height="54">
         </a>
-        <a class="store" id="btn-android" href="https://expo.dev/artifacts/eas/jqxGjH1tzjF9lt0JOmWdxChZ5lhJR04QrVzqGoYmoLk.apk" rel="noopener">
-          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 3.5v17c0 .4.4.7.8.5l9.4-8.5L4.8 3c-.4-.2-.8.1-.8.5zm12.6 7.6L6.9 2.7l7.6 7.4 2.1 1zm0 1.8-2.1 1-7.6 7.4 9.7-8.4zm3.9-2.3-2.7-1.5-2.6 2.9 2.6 2.9 2.7-1.5c.8-.5.8-2.3 0-2.8z"/></svg>
-          <span><small data-en="Android beta" data-uk="Бета для Android">Android beta</small>APK</span>
+        <a class="googleplay" id="btn-android" href="https://play.google.com/store/apps/details?id=com.bananiv.nanafeed" target="_blank" rel="noopener">
+          <img src="img/google-play-badge.png" alt="Get it on Google Play" width="207" height="80">
         </a>
       </div>
-      <p class="fine" data-en="Free. Available on the App Store. Android — open beta. Made in Frankfurt by people who trade bananas for a living."
-         data-uk="Безкоштовно. Доступно в App Store. Android — у відкритій беті. Зроблено у Франкфурті людьми, для яких банани — робота.">Free. Available on the App Store. Android — open beta. Made in Frankfurt by people who trade bananas for a living.</p>
+      <p class="fine" data-en="Free on the App Store and Google Play. Made in Frankfurt by people who trade bananas for a living."
+         data-uk="Безкоштовно в App Store і Google Play. Зроблено у Франкфурті людьми, для яких банани — робота.">Free on the App Store and Google Play. Made in Frankfurt by people who trade bananas for a living.</p>
     </div>
     <div class="phone"><img src="img/post.jpg" alt="nanafeed post: Bananiv bananas rated in Fora, Haisyn — brand, ripeness meter, price, taste stars" width="640" height="1308"></div>
   </section>
