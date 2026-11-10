@@ -52,8 +52,10 @@
 <div class="box">
   <a class="mark" href="/" aria-label="nanafeed"><img src="/img/logo-n.png" alt="">anafeed</a>
 
-  <!-- /post/<id>: a shared banana. The button points at this very URL, so on a phone
-       with the app installed the tap goes through the universal link / app link. -->
+  <!-- /post/<id>: a shared banana. The button fires the nanafeed:// scheme — Safari
+       refuses to re-open a universal link pointing at the SAME page, so an https href
+       here would just reload this 404. No app to catch the scheme → the script below
+       falls through to the store after 1.5s. -->
   <div id="post">
     <h1>This banana lives in nanafeed</h1>
     <p>Open the post in the app to see the photo, the taste score and where it was bought.</p>
@@ -81,7 +83,24 @@
   document.getElementById('plain').style.display = 'none';
   var post = document.getElementById('post');
   post.style.display = 'block';
-  document.getElementById('open-app').href = location.href;
+
+  var btn = document.getElementById('open-app');
+  btn.href = 'nanafeed://post/' + location.pathname.replace(/^\/post\//, '');
+
+  // App not installed → the scheme is a silent no-op. If the page is still
+  // visible 1.5s after the tap, hand over to the store; leaving the page
+  // (app opened) fires visibilitychange and cancels the fallback.
+  var ua = navigator.userAgent;
+  var store = /iPad|iPhone|iPod/.test(ua) ? 'https://apps.apple.com/app/id6766258928'
+            : /Android/i.test(ua)         ? 'https://play.google.com/store/apps/details?id=com.bananiv.nanafeed'
+            : null; // desktop: no app to open — the badges below are the way in
+  btn.addEventListener('click', function(){
+    if (!store) return;
+    var timer = setTimeout(function(){ location.href = store; }, 1500);
+    document.addEventListener('visibilitychange', function(){
+      if (document.hidden) clearTimeout(timer);
+    }, { once: true });
+  });
 })();
 </script>
 </body>
